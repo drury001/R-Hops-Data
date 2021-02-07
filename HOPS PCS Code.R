@@ -1,5 +1,5 @@
 
-install.packages("gplots")
+library(gdata)
 library(tidyverse)
 library(factoextra)
 library(psych)
@@ -10,10 +10,14 @@ library(gplots)
 
 HOD=as.data.frame(Hops_oil_and_acid_every)
 rownames(HOD) <- HOD$Variety
-
 HOD=HOD[-1]
-
 HOD.no_other=HOD[-8]
+
+summary(HOD)
+
+df <- scale(HOD.no_other)
+
+pairs(df)
 
 res.pca=prcomp(HOD.no_other, scale. = TRUE)
 
@@ -23,9 +27,6 @@ fviz_pca_ind(res.pca,label="ind",repel = TRUE)
 
 fviz_pca_biplot(res.pca, repel = TRUE )
 
-
-
-HODHOD=HOD %>% arrange(Beta)
 
 
 di <- dist(HOD.no_other, method="euclidean")
@@ -83,7 +84,42 @@ kable(GroupsSummary[[2]], format = "html", digits = 2) %>%
 m <- as.matrix(dist(HOD.no_other, method="euclidean"))
 
 
+#m.m_Citra=filter(m.m, Var1=="CITRA® HBC 394 CV.")
+
+m[upper.tri(m)] <- NA
+
 m.m=melt(m)
+
+#m.m_filter=filter(m.m,!is.na(value))
+
+#m.m_rank=arrange(m.m_filter,value)
+
+#m.m_rank_row=rownames_to_column(m.m_rank)
+
+#filter(m.m_rank_row, Var1=="CV12" & Var2=="CVC" | Var1=="CVC" & Var2=="CV12")
+
+m_filtered  <- m.m %>% filter(!is.na(value))%>%
+               filter(value>0) %>%
+               arrange(value)%>%
+               rownames_to_column()
+
+filter(m_filtered, Var1=="CV12" & Var2=="CVC" | Var1=="CVC" & Var2=="CV12")
+
+
+
+
+d <- dist(HOD.no_other, method="euclidean")
+
+
+# Hierarchical clustering using Ward's method
+res.hc <- hclust(d,  )
+
+# Cut tree into 4 groups
+grp <- cutree(res.hc, k = 2)
+
+# Visualize
+plot(res.hc, cex = 0.6) # plot tree
+rect.hclust(res.hc, k = 2, border = 2:5) # add rectangle
 
 
 
