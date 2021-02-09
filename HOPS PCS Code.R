@@ -8,7 +8,12 @@ library(reshape2)
 library(kableExtra)
 library(gplots)
 
-HOD=as.data.frame(Hops_oil_and_acid_every)
+HOD=read.csv("Hops oil and acid -every.csv")
+Hops_CVHOP=read.csv("Hops_CVHOP.csv")
+Hops_IP=read.csv("Hops_IP.csv")
+Hops_price=read.csv("Hops price.csv")
+
+
 rownames(HOD) <- HOD$Variety
 HOD=HOD[-1]
 HOD.no_other=HOD[-8]
@@ -19,19 +24,21 @@ df <- scale(HOD.no_other)
 
 pairs(df)
 
-res.pca=prcomp(HOD.no_other, scale. = TRUE)
-
+res.pca=prcomp(df)
 fviz_eig(res.pca)
 
 fviz_pca_ind(res.pca,label="ind",repel = TRUE)
 
-fviz_pca_biplot(res.pca, repel = TRUE )
+fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
+
+#fviz_pca_biplot(res.pca, repel = TRUE )
 
 
 
-di <- dist(HOD.no_other, method="euclidean")
-tree <- hclust(di, method="ward.D")
-plot(tree, xlab="")
+
+#di <- dist(HOD.no_other, method="euclidean")
+#tree <- hclust(di, )
+#plot(tree, xlab="")
 
 
 ### K-means
@@ -112,14 +119,32 @@ d <- dist(HOD.no_other, method="euclidean")
 
 
 # Hierarchical clustering using Ward's method
-res.hc <- hclust(d,  )
+res.hc <- hclust(d,  "average")
 
 # Cut tree into 4 groups
 grp <- cutree(res.hc, k = 2)
 
 # Visualize
 plot(res.hc, cex = 0.6) # plot tree
-rect.hclust(res.hc, k = 2, border = 2:5) # add rectangle
+#rect.hclust(res.hc, k = 2, border = 2:5) # add rectangle
+
+library("Hmisc")
+res2 <- rcorr(as.matrix(df),type=c("spearman"))
+res2 
+
+library("PerformanceAnalytics")
+chart.Correlation(as.matrix(df), histogram=TRUE, pch=19)
+
+df_price=cbind(df,scale(Hops_price$nomralized_price))
+
+chart.Correlation(as.matrix(df_price), histogram=TRUE, pch=19)
+
+
+
+
+df_price_IP=cbind(df_price,Hops_IP$Proprietary)
+
+chart.Correlation(as.matrix(df_price_IP), histogram=TRUE, pch=19)
 
 
 
