@@ -28,7 +28,7 @@ res.pca=prcomp(df)
 fviz_eig(res.pca)
 fviz_pca_ind(res.pca,label="ind",repel = TRUE)
 
-<<<<<<< HEAD
+
 fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
 
 #fviz_pca_biplot(res.pca, repel = TRUE )
@@ -39,7 +39,6 @@ fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
 #di <- dist(HOD.no_other, method="euclidean")
 #tree <- hclust(di, )
 #plot(tree, xlab="")
-=======
 #fviz_pca_biplot(res.pca, repel = TRUE )
 
 
@@ -48,7 +47,6 @@ fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
 di <- dist(HOD.no_other, method="euclidean")
 tree <- hclust(di, )
 plot(tree, xlab="")
->>>>>>> 1df28576aca3f72752f9740645970d2553fa43c1
 
 
 ### K-means
