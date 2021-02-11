@@ -53,16 +53,16 @@ plot(tree, xlab="")
 
 df <- scale(HOD.no_other)
 
-fviz_nbclust(df, kmeans,
-             method = "gap_stat")
+#fviz_nbclust(df, kmeans,
+#             method = "gap_stat")
 
 fviz_nbclust(df, pam, method="silhouette")+theme_classic()
 
 
 pm <- eclust(df,FUNcluster="pam", k=2,hc_metric = "euclidean")
 
-pm.sil<-silhouette(pm$cluster, dist(df))
-fviz_silhouette(pm.sil)
+#pm.sil<-silhouette(pm$cluster, dist(df))
+#fviz_silhouette(pm.sil)
 
 
 
