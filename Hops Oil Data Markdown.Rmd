@@ -1,0 +1,39 @@
+---
+title: "Hops Chemical Analysis"
+author: "Douglas W Drury"
+date: "2/9/2021"
+output: html_document
+---
+
+## R Markdown
+
+
+```{r}
+
+
+Hops_oil_and_acid_every=read.csv("Hops oil and acid -every.csv")
+HOD=as.data.frame(Hops_oil_and_acid_every)
+rownames(HOD) <- HOD$Variety
+HOD=HOD[-1]
+HOD.no_other=HOD[-8]
+
+summary(HOD)
+
+```
+
+## Including Plots
+
+
+```{r}
+df <- scale(HOD.no_other)
+
+pairs(df)
+```
+
+```{r}
+library(factoextra)
+
+res.pca=prcomp(df)
+fviz_eig(res.pca)
+fviz_pca_ind(res.pca,label="ind",repel = TRUE)
+```

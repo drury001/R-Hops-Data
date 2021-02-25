@@ -1,3 +1,4 @@
+### Load Packages ###
 
 library(gdata)
 library(tidyverse)
@@ -8,21 +9,24 @@ library(reshape2)
 library(kableExtra)
 library(gplots)
 
-HOD=read.csv("Hops oil and acid -every.csv")
-Hops_CVHOP=read.csv("Hops_CVHOP.csv")
-Hops_IP=read.csv("Hops_IP.csv")
-Hops_price=read.csv("Hops price.csv")
+
+### 
+
+HOD=read.csv("Hops oil and acid -every.csv")        ### Load Hops Oil and Acid Data
+Hops_CVHOP=read.csv("Hops_CVHOP.csv")   ### Load CV Hops LLC proprietary indicators
+Hops_IP=read.csv("Hops_IP.csv")   ### Load public domain vs patented indicators
+#Hops_price=read.csv("Hops price.csv")
 
 
-rownames(HOD) <- HOD$Variety
-HOD=HOD[-1]
-HOD.no_other=HOD[-8]
+rownames(HOD) <- HOD$Variety ### Make Hops Variety the row names
+HOD=HOD[-1]   ### Remove "Variety" from the matrix 
+HOD.no_other=HOD[-8]   ### Remove generic "other" from the matrix
 
-summary(HOD)
+summary(HOD)  ### Print distributional summary of each oil and acid
 
-df <- scale(HOD.no_other)
+df <- scale(HOD.no_other)  ### Normalize all variables to the same scale 
 
-pairs(df)
+pairs(df)  ### Created a matrix of scatterplots for each variable by each variable 
 
 res.pca=prcomp(df)
 fviz_eig(res.pca)
@@ -155,4 +159,36 @@ df_price_IP=cbind(df_price,Hops_IP$Proprietary)
 chart.Correlation(as.matrix(df_price_IP), histogram=TRUE, pch=19)
 
 
+
+library(wNNSel)
+library(reshape2)
+
+
+H_price=read.csv("Hops web prices.csv")
+
+head(H_price)
+
+price_matrix=dcast(H_price, X.1~Company , value.var = "Price.per.oz")
+
+
+rownames(price_matrix) <- price_matrix$X.1
+price_matrix_1=price_matrix[-1]
+price_matrix_1=as.matrix(price_matrix_1)
+
+
+HOD_Price_Merge=merge(df,price_matrix_1,by="row.names")
+
+rownames(HOD_Price_Merge) <- HOD_Price_Merge$Row.names
+HODPM=as.matrix(HOD_Price_Merge[-1])
+
+
+HODPM_impute=wNNSel(as.matrix(HODPM))
+
+HODPM_impute_Done=HODPM_impute$x.impute
+
+
+HODPM_impute_Done=as.data.frame(HODPM_impute_Done)
+
+
+chart.Correlation(as.matrix(HODPM_impute_Done), histogram=TRUE, pch=19)
 
