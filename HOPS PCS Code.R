@@ -1,3 +1,4 @@
+### Load Packages ###
 
 library(gdata)
 library(tidyverse)
@@ -8,61 +9,110 @@ library(reshape2)
 library(kableExtra)
 library(gplots)
 
-HOD=read.csv("Hops oil and acid -every.csv")
-Hops_CVHOP=read.csv("Hops_CVHOP.csv")
-Hops_IP=read.csv("Hops_IP.csv")
-Hops_price=read.csv("Hops price.csv")
+
+### Loading Dataframes 
+
+HOD=read.csv("Hops oil and acid -every.csv")    ### Load Hops Oil and Acid Data
+Hops_CVHOP=read.csv("Hops_CVHOP.csv")   ### Load CV Hops LLC proprietary indicators
+Hops_IP=read.csv("Hops_IP.csv")   ### Load public domain vs patented indicators
 
 
-rownames(HOD) <- HOD$Variety
-HOD=HOD[-1]
-HOD.no_other=HOD[-8]
+## Make Hops Variety the row names
 
-summary(HOD)
+rownames(HOD) <- HOD$Variety 
 
-df <- scale(HOD.no_other)
 
-pairs(df)
+## Remove "Variety" from the matrix 
 
-res.pca=prcomp(df)
-fviz_eig(res.pca)
-fviz_pca_ind(res.pca,label="ind",repel = TRUE)
+HOD=HOD[-1]  
 
+
+## Remove generic "other" from the matrix
+
+HOD.no_other=HOD[-8]   
+
+
+## Print distributional summary of each oil and acid
+
+summary(HOD)  
+
+
+## Normalize all variables to the same scale 
+
+df <- scale(HOD.no_other)  
+
+
+## Created a matrix of scatterplots for each variable by each variable 
+
+pairs(df)  
+
+
+## Calculate principle components
+
+res.pca=prcomp(df)   
+
+
+## Visualize the variance explained by Eigenvalues
+
+fviz_eig(res.pca)   
+
+
+## Graph of individuals on the Eigenvalue axis 
+
+fviz_pca_ind(res.pca,label="ind",repel = TRUE)  
+
+
+## Graph of individuals with CV Hops Data highlighted 
 
 fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
 
-#fviz_pca_biplot(res.pca, repel = TRUE )
+
+## K-means
+
+##  Determining The Optimal Number Of Clusters
+##
+##  A simple and popular solution consists of inspecting the dendrogram 
+##  produced using hierarchical clustering .
 
 
+## Elbow method
+
+fviz_nbclust(df, kmeans, method = "wss") +
+  geom_vline(xintercept = 4, linetype = 2)+
+  labs(subtitle = "Elbow method")
 
 
-#di <- dist(HOD.no_other, method="euclidean")
-#tree <- hclust(di, )
-#plot(tree, xlab="")
-#fviz_pca_biplot(res.pca, repel = TRUE )
-
-
-
-
-di <- dist(HOD.no_other, method="euclidean")
-tree <- hclust(di, )
-plot(tree, xlab="")
-
-
-### K-means
-
-df <- scale(HOD.no_other)
-
-#fviz_nbclust(df, kmeans,
-#             method = "gap_stat")
+## Silhouette method
 
 fviz_nbclust(df, pam, method="silhouette")+theme_classic()
 
 
+# Gap statistic
+# nboot = 50 to keep the function speedy. 
+# recommended value: nboot= 500 for your analysis.
+# Use verbose = FALSE to hide computing progression.
+
+set.seed(123)
+fviz_nbclust(df, kmeans, nstart = 25,  method = "gap_stat", nboot = 50)+
+  labs(subtitle = "Gap statistic method")
+
+
+
+## 30 indices for choosing the best number of clusters
+## -Majority rule to determine the optimal number of clusters
+
+library("NbClust")
+nb <- NbClust(df, distance = "euclidean", min.nc = 2,
+              max.nc = 9, method = "kmeans")
+
+fviz_nbclust(nb)
+
+
+## Enhanced k-means clustering
+## Visualizing K-Medoids clusters: 2
+
 pm <- eclust(df,FUNcluster="pam", k=2,hc_metric = "euclidean")
 
-#pm.sil<-silhouette(pm$cluster, dist(df))
-#fviz_silhouette(pm.sil)
 
 
 
@@ -136,23 +186,43 @@ grp <- cutree(res.hc, k = 2)
 plot(res.hc, cex = 0.6) # plot tree
 #rect.hclust(res.hc, k = 2, border = 2:5) # add rectangle
 
-library("Hmisc")
-res2 <- rcorr(as.matrix(df),type=c("spearman"))
-res2 
 
 library("PerformanceAnalytics")
 chart.Correlation(as.matrix(df), histogram=TRUE, pch=19)
 
-df_price=cbind(df,scale(Hops_price$nomralized_price))
 
-chart.Correlation(as.matrix(df_price), histogram=TRUE, pch=19)
-
-
+library(wNNSel)
+library(reshape2)
 
 
-df_price_IP=cbind(df_price,Hops_IP$Proprietary)
+H_price=read.csv("Hops web prices.csv")
 
-chart.Correlation(as.matrix(df_price_IP), histogram=TRUE, pch=19)
+head(H_price)
+
+price_matrix=dcast(H_price, X.1~Company , value.var = "Price.per.oz")
 
 
+rownames(price_matrix) <- price_matrix$X.1
+price_matrix_1=price_matrix[-1]
+price_matrix_1=as.matrix(price_matrix_1)
+
+
+HOD_Price_Merge=merge(df,price_matrix_1,by="row.names")
+
+rownames(HOD_Price_Merge) <- HOD_Price_Merge$Row.names
+HODPM=as.matrix(HOD_Price_Merge[-1])
+
+
+HODPM_impute=wNNSel(as.matrix(HODPM))
+
+HODPM_impute_Done=HODPM_impute$x.impute
+
+
+HODPM_impute_Done=as.data.frame(HODPM_impute_Done)
+
+
+chart.Correlation(as.matrix(HODPM_impute_Done), histogram=TRUE, pch=19)
+
+
+HODPM_impute_Done= 
 
