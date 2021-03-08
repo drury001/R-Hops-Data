@@ -2,9 +2,13 @@
 title: "Hops Chemical Analysis"
 author: "Douglas W Drury"
 date: "2/9/2021"
+<<<<<<< HEAD
 output:
   html_document: default
   pdf_document: default
+=======
+output: html_document
+>>>>>>> 83c26fef9076c8ce2d9bbb3389516316a8ab3427
 ---
 
 ## R Markdown
@@ -38,6 +42,7 @@ library(factoextra)
 res.pca=prcomp(df)
 fviz_eig(res.pca)
 fviz_pca_ind(res.pca,label="ind",repel = TRUE)
+<<<<<<< HEAD
 Hops_CVHOP=read.csv("Hops_CVHOP.csv") 
 fviz_pca_ind(res.pca,label="ind",repel = TRUE,col.ind=(Hops_CVHOP$Proprietary))
 ```
@@ -50,4 +55,6 @@ fviz_nbclust(df, pam, method="silhouette")
 pm <- eclust(df,FUNcluster="pam", k=2,hc_metric = "euclidean")
 
 
+=======
+>>>>>>> 83c26fef9076c8ce2d9bbb3389516316a8ab3427
 ```
